@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>README Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">README Generator</h1>
+        <form id="readmeForm">
+            <div class="form-group">
+                <label for="repoLink">GitHub Repository Link:</label>
+                <input type="text" id="repoLink" class="form-control" name="repoLink" required>
+            </div>
+
+            <h3>Select Sections to Include:</h3>
+            <div class="form-check">
+                <input type="checkbox" id="description" class="form-check-input" name="sections" value="description">
+                <label class="form-check-label" for="description">Description</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="installation" class="form-check-input" name="sections" value="installation">
+                <label class="form-check-label" for="installation">Installation</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="usage" class="form-check-input" name="sections" value="usage">
+                <label class="form-check-label" for="usage">Usage</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="contributing" class="form-check-input" name="sections" value="contributing">
+                <label class="form-check-label" for="contributing">Contributing</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="license" class="form-check-input" name="sections" value="license">
+                <label class="form-check-label" for="license">License</label>
+            </div>
+
+            <button type="button" class="btn btn-primary mt-3" onclick="generateReadme()">Generate README</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function generateReadme() {
+            const repoLink = document.getElementById('repoLink').value;
+            const sections = Array.from(document.querySelectorAll('input[name="sections"]:checked'))
+                                  .map(el => el.value);
+
+            fetch('/generate_readme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ repoLink, sections })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'README.md';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
